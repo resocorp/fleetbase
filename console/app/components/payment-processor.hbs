@@ -1,0 +1,147 @@
+<div class="payment-processor">
+    {{#unless @hideGatewaySelector}}
+        <PaymentGatewaySelector
+            @selectedGateway={{this.selectedGateway}}
+            @country={{@country}}
+            @currency={{@currency}}
+            @onGatewaySelected={{this.onGatewaySelected}}
+            @showDetails={{@showGatewayDetails}}
+            @showTestButton={{@showTestButton}}
+        />
+    {{/unless}}
+
+    <div class="mt-6">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Payment Summary
+            </h3>
+            
+            <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Amount</dt>
+                    <dd class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{format-currency @amount @currency}}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Payment Method</dt>
+                    <dd class="text-sm text-gray-900 dark:text-white">
+                        {{this.paymentGateway.getGatewayConfig this.selectedGateway.name}}
+                    </dd>
+                </div>
+                {{#if @email}}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                        <dd class="text-sm text-gray-900 dark:text-white">{{@email}}</dd>
+                    </div>
+                {{/if}}
+                {{#if @reference}}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reference</dt>
+                        <dd class="text-sm text-gray-900 dark:text-white font-mono">{{@reference}}</dd>
+                    </div>
+                {{/if}}
+            </dl>
+
+            {{#if @description}}
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        {{@description}}
+                    </p>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <Button
+            @type="button"
+            @variant="primary"
+            @size="lg"
+            @isLoading={{this.processPayment.isRunning}}
+            @disabled={{this.isProcessing}}
+            @onClick={{this.processPayment}}
+            class="flex-1"
+        >
+            {{#if this.processPayment.isRunning}}
+                Processing Payment...
+            {{else}}
+                Pay {{format-currency @amount @currency}}
+            {{/if}}
+        </Button>
+
+        {{#if @showCancelButton}}
+            <Button
+                @type="button"
+                @variant="outline"
+                @size="lg"
+                @disabled={{this.isProcessing}}
+                @onClick={{this.cancelPayment}}
+            >
+                Cancel
+            </Button>
+        {{/if}}
+    </div>
+
+    {{#if this.paymentResult}}
+        <div class="mt-6">
+            {{#if (eq this.paymentResult.gateway "stripe")}}
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div class="flex">
+                        <FaIcon @icon="info-circle" class="text-blue-500 mt-0.5 mr-3" />
+                        <div>
+                            <h4 class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                Complete your payment
+                            </h4>
+                            <p class="text-sm text-blue-700 dark:text-blue-200 mt-1">
+                                Please complete the payment process in the Stripe payment form.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {{else if (eq this.paymentResult.gateway "paystack")}}
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div class="flex">
+                        <FaIcon @icon="check-circle" class="text-green-500 mt-0.5 mr-3" />
+                        <div>
+                            <h4 class="text-sm font-medium text-green-900 dark:text-green-100">
+                                Payment Completed
+                            </h4>
+                            <p class="text-sm text-green-700 dark:text-green-200 mt-1">
+                                Your payment has been processed successfully.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+    {{/if}}
+
+    {{#if this.processPayment.last.isError}}
+        <div class="mt-6">
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="flex">
+                    <FaIcon @icon="exclamation-triangle" class="text-red-500 mt-0.5 mr-3" />
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-red-900 dark:text-red-100">
+                            Payment Failed
+                        </h4>
+                        <p class="text-sm text-red-700 dark:text-red-200 mt-1">
+                            {{this.processPayment.last.error.message}}
+                        </p>
+                        <div class="mt-3">
+                            <Button
+                                @type="button"
+                                @variant="outline"
+                                @size="sm"
+                                @onClick={{this.retryPayment}}
+                            >
+                                Try Again
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/if}}
+</div>

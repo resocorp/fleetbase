@@ -47,6 +47,15 @@ module.exports = function (environment) {
             publishableKey: getenv('STRIPE_KEY'),
         },
 
+        paystack: {
+            publicKey: getenv('PAYSTACK_PUBLIC_KEY'),
+        },
+
+        payment: {
+            defaultGateway: getenv('DEFAULT_PAYMENT_GATEWAY', 'stripe'),
+            enabledGateways: getenv('ENABLED_PAYMENT_GATEWAYS', 'stripe').split(','),
+        },
+
         defaultValues: {
             categoryImage: getenv('DEFAULT_CATEGORY_IMAGE', 'https://flb-assets.s3.ap-southeast-1.amazonaws.com/images/fallback-placeholder-1.png'),
             placeholderImage: getenv('DEFAULT_PLACEHOLDER_IMAGE', 'https://flb-assets.s3.ap-southeast-1.amazonaws.com/images/fallback-placeholder-2.png'),

@@ -1,0 +1,108 @@
+<div class="payment-gateway-selector">
+    <div class="mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Select Payment Method
+        </h3>
+        {{#if this.recommendedGateway}}
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                <FaIcon @icon="star" class="text-yellow-500 mr-1" />
+                {{this.paymentGateway.getGatewayConfig this.recommendedGateway.name}} is recommended for your region
+            </p>
+        {{/if}}
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {{#each this.enabledGateways as |gateway|}}
+            <div 
+                class="relative rounded-lg border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
+                       {{if (eq this.selectedGateway gateway.id) 'border-blue-500 ring-2 ring-blue-500' 'border-gray-300 dark:border-gray-600'}}"
+                {{on "click" (fn this.selectGateway gateway.id)}}
+            >
+                <div class="p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {{#if gateway.logo}}
+                                <img src={{gateway.logo}} alt={{gateway.name}} class="h-8 w-auto" />
+                            {{else}}
+                                <div class="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                    <FaIcon @icon="credit-card" class="text-gray-500" />
+                                </div>
+                            {{/if}}
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{gateway.name}}
+                                    {{#if (eq this.recommendedGateway gateway.id)}}
+                                        <FaIcon @icon="star" class="text-yellow-500 ml-1" />
+                                    {{/if}}
+                                </h4>
+                                {{#if (eq this.selectedGateway gateway.id)}}
+                                    <FaIcon @icon="check-circle" class="text-blue-500" />
+                                {{/if}}
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {{gateway.description}}
+                            </p>
+                            {{#if gateway.currencies}}
+                                <div class="mt-2">
+                                    <span class="text-xs text-gray-400">Supports:</span>
+                                    {{#each gateway.currencies as |currency index|}}
+                                        <span class="text-xs text-gray-600 dark:text-gray-300">
+                                            {{currency}}{{unless (eq index (sub gateway.currencies.length 1)) ", "}}
+                                        </span>
+                                    {{/each}}
+                                </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+
+                {{#if @showTestButton}}
+                    <div class="border-t border-gray-200 dark:border-gray-600 px-4 py-2">
+                        <Button 
+                            @type="button"
+                            @size="xs"
+                            @variant="outline"
+                            @isLoading={{this.testGateway.isRunning}}
+                            @onClick={{fn this.testGateway gateway.id}}
+                            class="w-full"
+                        >
+                            Test Connection
+                        </Button>
+                    </div>
+                {{/if}}
+            </div>
+        {{/each}}
+    </div>
+
+    {{#if @showDetails}}
+        <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            {{#let (find-by "id" this.selectedGateway this.enabledGateways) as |selectedConfig|}}
+                {{#if selectedConfig}}
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        {{selectedConfig.name}} Details
+                    </h4>
+                    <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {{#if selectedConfig.currencies}}
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Supported Currencies</dt>
+                                <dd class="text-sm text-gray-900 dark:text-white">
+                                    {{join ", " selectedConfig.currencies}}
+                                </dd>
+                            </div>
+                        {{/if}}
+                        {{#if selectedConfig.countries}}
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Supported Countries</dt>
+                                <dd class="text-sm text-gray-900 dark:text-white">
+                                    {{join ", " selectedConfig.countries}}
+                                </dd>
+                            </div>
+                        {{/if}}
+                    </dl>
+                {{/if}}
+            {{/let}}
+        </div>
+    {{/if}}
+</div>
